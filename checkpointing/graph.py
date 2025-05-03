@@ -10,8 +10,9 @@ from langgraph.prebuilt import ToolNode, tools_condition
 @tool
 def human_assistance_tool(query: str):
     """Request assistance from human"""
+    # when the AI call this tool, it will get interrupt and wait until the we get any reponse from support.py
     # it will save everything as a checkpoint in db and exit 
-    human_response = interrupt({"query": query})
+    human_response = interrupt({"query": query}) # human response will get from support.py when Command resumes with data
     
     return human_response["data"] # after human input, the tool will resume
 
@@ -31,7 +32,9 @@ class State(TypedDict):
 
 def chatbot(state: State):
     message = llm_with_tools.invoke(state["messages"])
-    
+    """
+    the assertion is checking that the number of tool calls in the message object is either 0 or 1 (not more than 1). This means the code is enforcing that the LLM can only make at most one tool call per message.
+    """
     assert len(message.tool_calls) <= 1
     # only run if last messages is not a tool call
     # read existing messages and adding the llm messages
