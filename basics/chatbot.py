@@ -117,7 +117,8 @@ graph_builder.add_node("route_edge", route_edge)
 # Adding Edges
 graph_builder.add_edge(START, "detect_query")
 
-graph_builder.add_conditional_edges("detect_query", route_edge) # as route_edge is the conditional edge
+# as route_edge is the conditional edge, it'll return -> solve_coding_question | solve_simple_question
+graph_builder.add_conditional_edges("detect_query", route_edge)
 
 graph_builder.add_edge("solve_coding_question", END)
 graph_builder.add_edge("solve_simple_question", END)

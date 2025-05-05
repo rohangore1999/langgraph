@@ -11,6 +11,10 @@ def init():
         
         while True:
             user_input = input("> ")
+            """
+                graph.stream: Step-by-step results (real-time)
+                graph.invoke: Just the final result (wait until complete)
+            """
             for event in graph_with_mongo.stream({"messages": [{"role": "user", "content": user_input}]}, config, stream_mode="values"):
                 if "messages" in event:
                     event["messages"][-1].pretty_print()

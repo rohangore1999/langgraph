@@ -10,7 +10,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 @tool
 def human_assistance_tool(query: str):
     """Request assistance from human"""
-    # when the AI call this tool, it will get interrupt and wait until the we get any reponse from support.py
+    # when the AI call this tool, it will get interrupt and wait until we get any reponse from support.py
     # it will save everything as a checkpoint in db and exit 
     human_response = interrupt({"query": query}) # human response will get from support.py when Command resumes with data
     
@@ -32,6 +32,8 @@ class State(TypedDict):
 
 def chatbot(state: State):
     message = llm_with_tools.invoke(state["messages"])
+    # The message object is a dictionary that contains the LLM's response and any tool calls it made.
+
     """
     the assertion is checking that the number of tool calls in the message object is either 0 or 1 (not more than 1). This means the code is enforcing that the LLM can only make at most one tool call per message.
     """
@@ -52,6 +54,18 @@ graph_builder.add_edge(START, "chatbot")
 
 # checking for tool condition
 graph_builder.add_conditional_edges("chatbot", tools_condition)
+
+"""
+If the LLM response (from "chatbot" step) includes human_assistance_tool call:
+    - tools_condition returns "tools"
+    - Flow goes to tool node to execute the human assistance tool
+    - After tool execution, returns to "chatbot"
+
+If the LLM just responds with a normal message:
+    - tools_condition returns None
+    - Flow goes directly to END
+"""
+
 # after tool condition will goto chatbot again
 graph_builder.add_edge("tools", "chatbot")
 
